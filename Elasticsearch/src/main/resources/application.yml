@@ -1,0 +1,9 @@
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: changeme
+
+logging:
+  level:
+    org.elasticsearch.client: DEBUG   # Hiển thị log truy vấn Elasticsearch
