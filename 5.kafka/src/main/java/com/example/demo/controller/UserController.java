@@ -17,26 +17,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
     @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) {
         return userService.saveUser(userDto);
-    }
-
-    // API cập nhật User
-    @PutMapping("/{id}")
-    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return userService.updateUser(id, userDto);
-    }
-
-    // API xóa User
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
     }
 }
 

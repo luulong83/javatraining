@@ -13,7 +13,7 @@ public class KafkaConsumerService {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consume(UserDto user) {
-        System.out.println("Received from Kafka: " + user);
+        System.out.println("\u001B[34m:::: Đã nhận từ Kafka: " + user + "\u001B[0m");
     }
 }
 

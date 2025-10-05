@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -21,16 +22,24 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
 
-    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+    // ✅ Lấy từ application.properties
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
+
+    @Value("${app.kafka.topic.user}")
+    private String userTopicName;
 
     // ==================== Producer ====================
     @Bean
     public ProducerFactory<String, UserDto> producerFactory() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        config.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false); // optional: để loại bỏ __TypeId__ header
+        config.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         return new DefaultKafkaProducerFactory<>(config);
     }
 
@@ -43,13 +52,15 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, UserDto> consumerFactory() {
         JsonDeserializer<UserDto> deserializer = new JsonDeserializer<>(UserDto.class);
-        deserializer.addTrustedPackages("*"); // hoặc "com.example.demo.dto"
+        deserializer.addTrustedPackages("*");
+
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "user-group");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
 
@@ -64,6 +75,6 @@ public class KafkaConfig {
     // ==================== Topic ====================
     @Bean
     public NewTopic userTopic() {
-        return new NewTopic("user-topic", 1, (short) 1);
+        return new NewTopic(userTopicName, 1, (short) 1);
     }
 }

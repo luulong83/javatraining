@@ -19,10 +19,8 @@ repositories {
 }
 
 dependencies {
-	// Spring Boot Web & JPA
+	// Spring Boot Web
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("mysql:mysql-connector-java:8.0.33")
 
 	// MapStruct
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
