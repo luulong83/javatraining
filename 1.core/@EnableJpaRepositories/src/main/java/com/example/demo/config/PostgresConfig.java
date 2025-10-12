@@ -1,42 +1,50 @@
 package com.example.demo.config;
 
-import jakarta.persistence.EntityManagerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
-import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-/*package com.example.demo.repository.postgres;*/
+import java.util.Properties;
+
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.demo.repository.postgres"
-)
-@EntityScan(
-        basePackages = "com.example.demo.entity.postgres"
+        basePackages = "com.example.demo.repository.postgres",
+        entityManagerFactoryRef = "entityManagerFactory", // Match bean name
+        transactionManagerRef = "transactionManager"
 )
 public class PostgresConfig {
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean postgresEntityManager(
-            EntityManagerFactoryBuilder builder,
-            DataSource dataSource) {
-
-        return builder
-                .dataSource(dataSource)
-                .packages("com.example.demo.model.postgres") // entity package
-                .persistenceUnit("postgresPU")
-                .build();
+    public DataSource dataSource() {
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/testdb?options=-c%20TimeZone=Asia/Ho_Chi_Minh");
+        dataSource.setUsername("postgres");
+        dataSource.setPassword("postgres");
+        return dataSource;
     }
 
     @Bean
-    public PlatformTransactionManager postgresTransactionManager(
-            @Qualifier("postgresEntityManager") EntityManagerFactory entityManagerFactory) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+        em.setPackagesToScan("com.example.demo.entity"); // Adjust to your entity package
+        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.jdbc.time_zone", "Asia/Ho_Chi_Minh");
+        em.setJpaProperties(properties);
+        em.setPersistenceUnitName("postgresPU");
+        return em;
+    }
+
+    @Bean
+    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
