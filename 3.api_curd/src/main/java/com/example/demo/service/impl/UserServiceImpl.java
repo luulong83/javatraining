@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(UserDto userDto) {
         User entity = userMapper.toEntity(userDto);
-        entity.setPassword("123456");
+        // entity.setPassword("123456");
         User saved = userRepository.save(entity);
         return userMapper.toDto(saved);
     }

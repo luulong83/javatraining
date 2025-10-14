@@ -16,7 +16,7 @@ public interface UserMapper {
     // MapStruct sẽ tự map field trùng tên
     UserDto toDto(User entity);
 
-    @Mapping(target = "password", ignore = true) // bỏ qua password khi map
+    @Mapping(target = "id", ignore = true)
     User toEntity(UserDto dto);
 
     // mapping cho List
